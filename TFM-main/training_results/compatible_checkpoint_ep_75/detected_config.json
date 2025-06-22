@@ -1,0 +1,6 @@
+{
+  "agent_needs_team": true,
+  "agent_needs_valid_actions": true,
+  "env_has_custom_api": true,
+  "default_state_size": 20,
+  "default_action_size": 

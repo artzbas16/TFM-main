@@ -1,0 +1,8 @@
+{
+  "env_config": {
+    "has_terminations": false,
+    "has_truncations": false,
+    "has_agent_iter": true,
+    "has_last": true,
+    "default_state_size": 20,
+    "default_action_size": 

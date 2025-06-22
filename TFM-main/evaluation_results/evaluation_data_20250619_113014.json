@@ -1,0 +1,135 @@
+{
+  "overall_performance": {
+    "equipo_1": {
+      "win_rate": 0.6824324324324325,
+      "games_won": 101,
+      "total_games": 148
+    },
+    "equipo_2": {
+      "win_rate": 0.31756756756756754,
+      "games_won": 47,
+      "total_games": 148
+    }
+  },
+  "phase_performance": {
+    "GRANDE": {
+      "equipo_1": 103,
+      "equipo_2": 46
+    },
+    "CHICA": {
+      "equipo_1": 64,
+      "equipo_2": 17
+    },
+    "PARES": {
+      "equipo_2": 19,
+      "equipo_1": 34
+    },
+    "JUEGO": {
+      "equipo_1": 47,
+      "equipo_2": 11
+    }
+  },
+  "strategy_analysis": {
+    "MUS_3": {
+      "count": 149,
+      "percentage": 11.330798479087452
+    },
+    "GRANDE_6": {
+      "count": 148,
+      "percentage": 11.254752851711027
+    },
+    "CHICA_6": {
+      "count": 81,
+      "percentage": 6.159695817490494
+    },
+    "JUEGO_6": {
+      "count": 36,
+      "percentage": 2.737642585551331
+    },
+    "GRANDE_5": {
+      "count": 81,
+      "percentage": 6.159695817490494
+    },
+    "CHICA_5": {
+      "count": 63,
+      "percentage": 4.790874524714829
+    },
+    "PARES_6": {
+      "count": 22,
+      "percentage": 1.6730038022813687
+    },
+    "JUEGO_5": {
+      "count": 35,
+      "percentage": 2.6615969581749046
+    },
+    "PARES_5": {
+      "count": 17,
+      "percentage": 1.2927756653992395
+    },
+    "GRANDE_7": {
+      "count": 68,
+      "percentage": 5.171102661596958
+    },
+    "MUS_2": {
+      "count": 80,
+      "percentage": 6.083650190114068
+    },
+    "GRANDE_0": {
+      "count": 54,
+      "percentage": 4.106463878326997
+    },
+    "CHICA_0": {
+      "count": 39,
+      "percentage": 2.9657794676806084
+    },
+    "JUEGO_0": {
+      "count": 18,
+      "percentage": 1.3688212927756656
+    },
+    "CHICA_1": {
+      "count": 33,
+      "percentage": 2.5095057034220534
+    },
+    "JUEGO_1": {
+      "count": 14,
+      "percentage": 1.064638783269962
+    },
+    "GRANDE_1": {
+      "count": 34,
+      "percentage": 2.585551330798479
+    },
+    "PARES_7": {
+      "count": 7,
+      "percentage": 0.532319391634981
+    },
+    "PARES_1": {
+      "count": 10,
+      "percentage": 0.7604562737642585
+    },
+    "DESCARTE_14": {
+      "count": 218,
+      "percentage": 16.577946768060837
+    },
+    "DESCARTE_12": {
+      "count": 11,
+      "percentage": 0.8365019011406843
+    },
+    "DESCARTE_11": {
+      "count": 67,
+      "percentage": 5.095057034220532
+    },
+    "CHICA_7": {
+      "count": 18,
+      "percentage": 1.3688212927756656
+    },
+    "PARES_0": {
+      "count": 10,
+      "percentage": 0.7604562737642585
+    },
+    "JUEGO_7": {
+      "count": 2,
+      "percentage": 0.1520912547528517
+    }
+  },
+  "critical_decisions": {}
+}

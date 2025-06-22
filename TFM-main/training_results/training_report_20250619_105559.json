@@ -1,0 +1,36 @@
+{
+  "timestamp": "20250619_105559",
+  "total_episodes": 2,
+  "final_statistics": {
+    "jugador_0": {
+      "avg_reward": -8.4,
+      "max_reward": 0.19999999999999996,
+      "min_reward": -12.9,
+      "final_reward": 0.19999999999999996,
+      "improvement": 13.1
+    },
+    "jugador_1": {
+      "avg_reward": 15.899999999999999,
+      "max_reward": 23.5,
+      "min_reward": 0.8,
+      "final_reward": 0.8,
+      "improvement": -22.599999999999998
+    },
+    "jugador_2": {
+      "avg_reward": -8.233333333333333,
+      "max_reward": 0.19999999999999996,
+      "min_reward": -12.5,
+      "final_reward": 0.19999999999999996,
+      "improvement": 12.6
+    },
+    "jugador_3": {
+      "avg_reward": 15.899999999999999,
+      "max_reward": 23.5,
+      "min_reward": 0.8,
+      "final_reward": 0.8,
+      "improvement": -22.599999999999998
+    },
+    "equipo_1_win_rate": 0.0,
+    "equipo_2_win_rate": 1.0
+  }
+}

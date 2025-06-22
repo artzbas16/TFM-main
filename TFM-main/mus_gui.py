@@ -52,6 +52,8 @@ PURPLE = (128, 0, 128)
 LIGHT_GRAY = (220, 220, 220)
 DARK_GREEN = (0, 100, 0)
 
+agentes = ["jugador_0", "jugador_1", "jugador_2", "jugador_3"]
+
 acciones = {
     0: "Paso",
     1: "Envido",
@@ -63,8 +65,8 @@ acciones = {
     7: "Quiero"
 }
 
-modo_solo_ia = False
-training_mode = False
+modo_solo_ia = True
+training_mode = True
 # Cargar entorno
 mus_env = mus.env()
 mus_env.reset()
@@ -262,28 +264,40 @@ def draw_step(agent, accion):
     if agent not in mus_env.agents:
         return
         
-    i = mus_env.agents.index(agent)
+    i = agentes.index(agent)
     x, y = agent_positions[i]
     
     # Solo dibujar si no está en fase de recuento y no está "done"
     if not mus_env.dones.get(agent, False) and mus_env.fase_actual != "RECUENTO":
-        # Marco naranja más visible
-        pygame.draw.rect(screen, ORANGE, (x - 140, y - 20, 310, 140), 4)
-        pygame.draw.rect(screen, YELLOW, (x - 135, y - 15, 300, 130), 2)
+        # Marco naranja más visible - ajustado para cartas verticales
+        if i == 1 or i == 3:  # Jugadores con cartas verticales
+            pygame.draw.rect(screen, ORANGE, (x - 80, y - 140, 160, 310), 4)
+            pygame.draw.rect(screen, YELLOW, (x - 75, y - 135, 150, 300), 2)
+        else:  # Jugadores con cartas horizontales
+            pygame.draw.rect(screen, ORANGE, (x - 140, y - 20, 310, 140), 4)
+            pygame.draw.rect(screen, YELLOW, (x - 135, y - 15, 300, 130), 2)
         
         # Mostrar decisión del jugador actual
-        decision = acciones.get(accion, "Desconocida")
-        decision_texto = font_small.render(f"Decisión: {decision}", True, ORANGE)
+        if 11 <= accion <=14:  # Acciones de descarte
+            decision = "Descartando carta"
+            decision_texto = font_small.render(f"Decisión: {decision}", True, ORANGE)
+        else:  # Otras acciones
+            decision = acciones.get(accion, "Desconocida")
+            decision_texto = font_small.render(f"Decisión: {decision}", True, ORANGE)
         
         # Posicionamiento según la posición del jugador
         if i == 0:  # Jugador humano (abajo)
             screen.blit(decision_texto, (x - 120, y - 35))
         elif i == 1:  # Jugador derecha
-            screen.blit(decision_texto, (x - 180, y - 70))
+            # Rotar el texto para jugador vertical
+            decision_texto_rotado = pygame.transform.rotate(decision_texto, 90)
+            screen.blit(decision_texto_rotado, (x - 110, y - 50))
         elif i == 2:  # Jugador arriba
             screen.blit(decision_texto, (x - 120, y + 120))
         elif i == 3:  # Jugador izquierda
-            screen.blit(decision_texto, (x + 20, y - 70))
+            # Rotar el texto para jugador vertical
+            decision_texto_rotado = pygame.transform.rotate(decision_texto, -90)
+            screen.blit(decision_texto_rotado, (x + 100, y - 50))
 
 def draw_table():
     # Dibujar fondo de la mesa
@@ -360,23 +374,25 @@ def draw_table():
             ordago_texto = font.render("¡ÓRDAGO EN JUEGO!", True, RED)
             screen.blit(ordago_texto, (50, 230))
 
+    
+
     # Dibujar cartas de los jugadores y marcar al jugador actual
-    for i, agent in enumerate(mus_env.agents):
+    for i, agent in enumerate(agentes):
         x, y = agent_positions[i]
-        # CORRECCIÓN: Dibujar un marco alrededor del jugador actual con mejor lógica
-        
-        
         # Mostrar el equipo al que pertenece cada jugador
         equipo = mus_env.equipo_de_jugador[agent]
         equipo_texto = font_large.render(f"{equipo}", True, equipo_colors[equipo])
+        
         if i == 0:  # Jugador humano (abajo)
             screen.blit(equipo_texto, (x - 50, y - 70))
         elif i == 1:  # Jugador derecha
-            screen.blit(equipo_texto, (x - 50, y - 70))
+            equipo_texto_rotado = pygame.transform.rotate(equipo_texto, -90)
+            screen.blit(equipo_texto_rotado, (x + 80, y - 50))
         elif i == 2:  # Jugador arriba
             screen.blit(equipo_texto, (x - 50, y - 70))
         elif i == 3:  # Jugador izquierda
-            screen.blit(equipo_texto, (x - 50, y - 70))
+            equipo_texto_rotado = pygame.transform.rotate(equipo_texto, 90)
+            screen.blit(equipo_texto_rotado, (x - 100, y - 50))
         
         # Mostrar declaraciones SOLO en las fases correspondientes
         if mus_env.fase_actual == "PARES" and agent in mus_env.declaraciones_pares:
@@ -426,9 +442,17 @@ def draw_table():
                     screen.blit(img, (x - 120 + j * 70, y))
                     if j in mus_env.cartas_a_descartar.get(agent, []):
                         pygame.draw.rect(screen, RED, (x - 120 + j * 70, y, 60, 100), 3)
-        else:  # Otros jugadores - mostrar reverso
+        elif i == 1:  # Jugador derecha - cartas verticales
+            for j in range(4):
+                carta_rotada = pygame.transform.rotate(carta_reverso, 90)
+                screen.blit(carta_rotada, (x - 50, y - 120 + j * 70))
+        elif i == 2:  # Jugador arriba - cartas horizontales
             for j in range(4):
                 screen.blit(carta_reverso, (x - 120 + j * 70, y))
+        elif i == 3:  # Jugador izquierda - cartas verticales
+            for j in range(4):
+                carta_rotada = pygame.transform.rotate(carta_reverso, -90)
+                screen.blit(carta_rotada, (x - 50, y - 120 + j * 70))
     
     # Dibujar botones según la fase actual y el contexto
     for boton in botones:
@@ -477,7 +501,7 @@ def draw_final_final_screen():
         screen.blit(texto_ganador, (WIDTH // 2 - 200, HEIGHT - 100))
     
     # Mostrar todas las cartas de todos los jugadores
-    for i, agent in enumerate(mus_env.agents):
+    for i, agent in enumerate(agentes):
         x, y = agent_positions[i]
         
         # Nombre del jugador y equipo
@@ -499,7 +523,14 @@ def draw_final_final_screen():
             for j, (valor, palo) in enumerate(mano):
                 img = cartas_img.get((valor, palo))
                 if img:
-                    screen.blit(img, (x - 120 + j * 70, y))
+                    if i == 1:  # Jugador derecha - cartas verticales
+                        img_rotada = pygame.transform.rotate(img, 90)
+                        screen.blit(img_rotada, (x - 50, y - 120 + j * 70))
+                    elif i == 3:  # Jugador izquierda - cartas verticales
+                        img_rotada = pygame.transform.rotate(img, -90)
+                        screen.blit(img_rotada, (x - 50, y - 120 + j * 70))
+                    else:  # Jugadores 0 y 2 - cartas horizontales
+                        screen.blit(img, (x - 120 + j * 70, y))
     
     # Tabla de puntos centrada
     tabla_x = WIDTH // 2 - 250
@@ -602,7 +633,7 @@ def draw_final_screen():
     screen.blit(titulo, titulo_rect)
     
     # Mostrar todas las cartas de todos los jugadores
-    for i, agent in enumerate(mus_env.agents):
+    for i, agent in enumerate(agentes):
         x, y = agent_positions[i]
         
         # Nombre del jugador y equipo
@@ -624,7 +655,14 @@ def draw_final_screen():
             for j, (valor, palo) in enumerate(mano):
                 img = cartas_img.get((valor, palo))
                 if img:
-                    screen.blit(img, (x - 120 + j * 70, y))
+                    if i == 1:  # Jugador derecha - cartas verticales
+                        img_rotada = pygame.transform.rotate(img, 90)
+                        screen.blit(img_rotada, (x - 50, y - 120 + j * 70))
+                    elif i == 3:  # Jugador izquierda - cartas verticales
+                        img_rotada = pygame.transform.rotate(img, -90)
+                        screen.blit(img_rotada, (x - 50, y - 120 + j * 70))
+                    else:  # Jugadores 0 y 2 - cartas horizontales
+                        screen.blit(img, (x - 120 + j * 70, y))
     
     # Tabla de puntos centrada
     tabla_x = WIDTH // 2 - 250
@@ -829,9 +867,28 @@ def main():
                 current_agent, marl_agents, prev_states, prev_actions, current_rewards
             )
             
+
+            # Draw the current step and display it
             draw_step(current_agent, action)
-            pygame.display.flip() 
+            pygame.display.flip()
+            
+            # Wait at least 2 seconds for each turn
+            if not training_mode:
+                start_time = time.time()
+                while time.time() - start_time < 2:
+                    pygame.event.pump()  # Keep processing events to prevent freezing
+                    time.sleep(0.1)
+
             mus_env.step(action)
+                
+            # If the phase has changed after this step, make sure to display the last action
+            previous_phase = mus_env.fase_actual
+            
+            if previous_phase != mus_env.fase_actual:
+                # Phase has changed, make sure to display the last action for a moment
+                draw_step(current_agent, action)
+                pygame.display.flip()
+                pygame.time.wait(2000)  # Wait 2 seconds at the end of each phase
 
             # Compartir experiencia entre compañeros de equipo
             if training_mode and current_agent in marl_agents:
@@ -909,6 +966,15 @@ def main():
                     
                     if boton_pulsado:
                         mus_env.step(boton_pulsado.accion)
+                        draw_step(current_agent, boton_pulsado.accion)
+                        pygame.display.flip()
+
+                        if not training_mode:
+                            start_time = time.time()
+                            while time.time() - start_time < 2:
+                                pygame.event.pump()  # Keep processing events to prevent freezing
+                                time.sleep(0.1)
+                                
                     elif mus_env.fase_actual == "DESCARTE":
                         # Manejar clic en cartas
                         x, y = agent_positions[0]
@@ -916,7 +982,16 @@ def main():
                             carta_rect = pygame.Rect(x - 120 + j * 70, y, 60, 100)
                             if carta_rect.collidepoint(mouse_pos):
                                 mus_env.step(11 + j)
+                                draw_step(current_agent, 11 + j)  # Acción de descarte
+                                pygame.display.flip()
+
+                                if not training_mode:
+                                    start_time = time.time()
+                                    while time.time() - start_time < 2:
+                                        pygame.event.pump()  # Keep processing events to prevent freezing
+                                        time.sleep(0.1)
                                 break
+
         # Actualizar estado visual de los botones (hover)
         for boton in botones:
             boton.actualizar_estado(mouse_pos)

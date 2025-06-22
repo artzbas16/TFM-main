@@ -25,10 +25,12 @@ class MusEnv(AECEnv):
             "equipo_2": ["jugador_1", "jugador_3"]
         }
         # Mapeo inverso para saber a qué equipo pertenece cada jugador
-        self.equipo_de_jugador = {}
-        for equipo, jugadores in self.equipos.items():
-            for jugador in jugadores:
-                self.equipo_de_jugador[jugador] = equipo
+        self.equipo_de_jugador = {
+            "jugador_0": "equipo_1",
+            "jugador_1": "equipo_2", 
+            "jugador_2": "equipo_1",
+            "jugador_3": "equipo_2"
+        }
 
         # Fases del juego
         self.fases = ["MUS", "DESCARTE", "GRANDE", "CHICA", "PARES", "JUEGO", "RECUENTO"]
@@ -49,6 +51,7 @@ class MusEnv(AECEnv):
         
         # Control de apuestas
         self.apuesta_actual = 0
+        apuesta_actual_ordago = 0
         self.equipo_apostador = None
         self.jugador_apostador = None
         self.ronda_completa = False
@@ -161,6 +164,13 @@ class MusEnv(AECEnv):
         self.jugadores_hablaron = set()
         self.jugadores_que_pueden_hablar = set()
         self.hay_ordago = False
+
+        self.equipo_de_jugador = {
+            "jugador_0": "equipo_1",
+            "jugador_1": "equipo_2", 
+            "jugador_2": "equipo_1",
+            "jugador_3": "equipo_2"
+        }
         
         self.agents = self.possible_agents[:]
         self.agents = self.agents[self.mano:] + self.agents[:self.mano]
@@ -198,12 +208,16 @@ class MusEnv(AECEnv):
         self.agents = self.possible_agents[:]
         self.agents = self.agents[self.mano:] + self.agents[:self.mano]
         
+        # IMPORTANTE: Los equipos NO cambian, se mantienen fijos
+        # No tocar self.equipo_de_jugador aquí
+        
         # Crear nuevo selector de agentes
         self.agent_selector = agent_selector(self.agents)
         self.agent_selection = self.agent_selector.next()
         
         print(f"Nueva mano: jugador_{self.mano}, Nuevo orden: {self.agents}")
         print(f"Primer jugador en hablar: {self.agent_selection}")
+        print(f"Equipos (NO cambian): {self.equipo_de_jugador}")
 
     def repartir_cartas(self):
         """Verificar que hay suficientes cartas antes de repartir"""
@@ -604,6 +618,13 @@ class MusEnv(AECEnv):
         if hasattr(self, 'jugadores_confirmaron_descarte'):
             self.jugadores_confirmaron_descarte = set()
 
+        self.equipo_de_jugador = {
+            "jugador_0": "equipo_1",
+            "jugador_1": "equipo_2", 
+            "jugador_2": "equipo_1",
+            "jugador_3": "equipo_2"
+        }
+
     def realizar_descarte(self, agent):
         """Mejorar lógica de descarte"""
         if agent not in self.manos:
@@ -674,6 +695,12 @@ class MusEnv(AECEnv):
             self.siguiente_jugador_que_puede_hablar()
         
         elif action == 1:  # Envido
+
+            if self.equipo_apostador == equipo_actual:
+                print(f"El jugador {agent} no puede envidar porque su compañero ya ha envidado")
+                self.siguiente_jugador_que_puede_hablar()
+                return
+            
             self.apuesta_actual += 2
             self.jugador_apostador = agent
             self.equipo_apostador = self.equipo_de_jugador[agent]
@@ -684,7 +711,7 @@ class MusEnv(AECEnv):
         
         elif action == 5:  # No quiero
             if self.hay_ordago:
-                puntos_ganados = 1
+                puntos_ganados = max(1, self.apuesta_actual)
                 self.puntos_equipos[self.equipo_apostador] += puntos_ganados
                 self.apuestas[self.equipo_apostador][fase] = puntos_ganados
                 self.ganadores_fases[fase] = self.equipo_apostador
@@ -693,7 +720,7 @@ class MusEnv(AECEnv):
                 
             elif self.apuesta_actual > 0 and self.equipo_apostador is not None:
                 if equipo_actual != self.equipo_apostador:
-                    puntos_ganados = max(1, self.apuesta_actual - 1)
+                    puntos_ganados = max(1, self.apuesta_actual)
                     self.puntos_equipos[self.equipo_apostador] += puntos_ganados
                     self.apuestas[self.equipo_apostador][fase] = puntos_ganados
                     self.ganadores_fases[fase] = self.equipo_apostador
@@ -703,7 +730,13 @@ class MusEnv(AECEnv):
             self.siguiente_jugador_que_puede_hablar()
         
         elif action == 6:  # Ordago
-            self.apuesta_actual = 30
+
+            if self.equipo_apostador == equipo_actual:
+                print(f"El jugador {agent} no puede hacer órdago porque su compañero ya ha envidado")
+                self.siguiente_jugador_que_puede_hablar()
+                return
+            
+            self.apuesta_actual_ordago = 30
             self.hay_ordago = True
             self.jugador_apostador = agent
             self.equipo_apostador = self.equipo_de_jugador[agent]
@@ -717,7 +750,8 @@ class MusEnv(AECEnv):
                 self.determinar_ganador_fase(fase)
                 equipo_ganador = self.ganadores_fases[fase]
                 if equipo_ganador:
-                    self.puntos_equipos[equipo_ganador] = 30  # Ganar la partida (30 puntos)
+                    self.apuestas[equipo_ganador][fase] = self.apuesta_actual_ordago
+                    self.puntos_equipos[equipo_ganador] = self.apuesta_actual_ordago  # Ganar la partida (30 puntos)
                     self.partidas_ganadas[equipo_ganador] += 1  # Registrar partida ganada
                     print(self.partidas_ganadas[equipo_ganador])
                     self.partida_terminada = True
