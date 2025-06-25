@@ -66,7 +66,7 @@ acciones = {
 }
 
 modo_solo_ia = True
-training_mode = True
+training_mode = False
 # Cargar entorno
 mus_env = mus.env()
 mus_env.reset()
@@ -850,7 +850,7 @@ def main():
             state_size, action_size, agent_id, team
         )
         # Cargar modelo preentrenado si existe
-        model_path = f"model_jugador_{agent_id}.pth"
+        model_path = f"trained_models/model_jugador_{agent_id}_ep_final.pth"
         marl_agents[f"jugador_{agent_id}"].load(model_path)
 
     episode_count = 0

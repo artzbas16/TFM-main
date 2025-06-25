@@ -72,14 +72,22 @@ class TrainingVisualizer:
             rewards_data = episode_data.get('rewards', {})
             if isinstance(rewards_data, dict):
                 for agent_id, reward in rewards_data.items():
-                    if reward is not None and not np.isnan(float(reward)):
-                        self.metrics['episode_rewards'][agent_id].append(float(reward))
-                
+                    if reward is not None:
+                        try:
+                            reward_val = float(reward)
+                            if not np.isnan(reward_val):
+                                self.metrics['episode_rewards'][agent_id].append(reward_val)
+                        except (TypeError, ValueError):
+                            pass
+            
             # Duración del episodio
             if 'length' in episode_data and episode_data['length'] is not None:
-                length = int(episode_data['length'])
-                if length > 0:
-                    self.metrics['episode_lengths'].append(length)
+                try:
+                    length = int(episode_data['length'])
+                    if length > 0:
+                        self.metrics['episode_lengths'].append(length)
+                except (TypeError, ValueError):
+                    pass
             
             # Tasa de victoria por equipo
             if 'winner' in episode_data and episode_data['winner'] is not None:
@@ -92,33 +100,45 @@ class TrainingVisualizer:
             epsilons_data = episode_data.get('epsilons', {})
             if isinstance(epsilons_data, dict):
                 for agent_id, epsilon in epsilons_data.items():
-                    if epsilon is not None and not np.isnan(float(epsilon)):
-                        self.metrics['epsilon_values'][agent_id].append(float(epsilon))
-                
+                    if epsilon is not None:
+                        try:
+                            epsilon_val = float(epsilon)
+                            if not np.isnan(epsilon_val):
+                                self.metrics['epsilon_values'][agent_id].append(epsilon_val)
+                        except (TypeError, ValueError):
+                            pass
+            
             # Pérdidas de entrenamiento
             losses_data = episode_data.get('losses', {})
             if isinstance(losses_data, dict):
                 for agent_id, loss in losses_data.items():
-                    if loss is not None and not np.isnan(float(loss)) and float(loss) > 0:
-                        self.metrics['loss_values'][agent_id].append(float(loss))
-                
+                    if loss is not None:
+                        try:
+                            loss_val = float(loss)
+                            if not np.isnan(loss_val) and loss_val > 0:
+                                self.metrics['loss_values'][agent_id].append(loss_val)
+                        except (TypeError, ValueError):
+                            pass
+            
             # Rendimiento por fase
             phase_performance = episode_data.get('phase_performance', {})
             if isinstance(phase_performance, dict):
                 for phase, success in phase_performance.items():
                     if success is not None:
-                        success_value = 1.0 if success else 0.0
-                        self.metrics['phase_success'][phase].append(success_value)
-                
-            self.current_episode = episode
+                        try:
+                            success_value = 1.0 if success else 0.0
+                            self.metrics['phase_success'][phase].append(success_value)
+                        except (TypeError, ValueError):
+                            pass
             
+            self.current_episode = episode
+        
         except Exception as e:
             print(f"Error actualizando métricas: {e}")
-            # Continuar sin actualizar métricas problemáticas
         
     def _smooth_curve(self, data, window=None):
         """Suaviza una curva usando media móvil"""
-        if not data or len(data) == 0:
+        if data is None or (hasattr(data, '__len__')) and len(data) == 0:
             return []
         
         # Convertir a lista si es un array de numpy
@@ -128,11 +148,16 @@ class TrainingVisualizer:
         # Filtrar valores None y NaN
         clean_data = []
         for item in data:
-            if item is not None and not (isinstance(item, float) and np.isnan(item)):
-                clean_data.append(float(item))
-            else:
-                # Si hay un valor None/NaN, usar el último valor válido o 0
+            if item is None:
                 clean_data.append(clean_data[-1] if clean_data else 0.0)
+            elif isinstance(item, (np.ndarray, list)):
+                # Handle arrays/lists by taking the first element (or another logic)
+                clean_data.append(float(item[0]) if len(item) > 0 else 0.0)
+            else:
+                try:
+                    clean_data.append(float(item))
+                except (ValueError, TypeError):
+                    clean_data.append(clean_data[-1] if clean_data else 0.0)
         
         if len(clean_data) == 0:
             return []
